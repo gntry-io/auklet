@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// Constants representing the Service states
 const (
 	StateStable         = "stable"
 	StateUnderThreshold = "under_threshold"
@@ -16,6 +17,8 @@ const (
 	StateScaling        = "scaling"
 )
 
+// Service is the finite state machine that represents a Swarm Service within
+// Auklet.
 type Service struct {
 	ServiceID       string
 	PollInterval    time.Duration

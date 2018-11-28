@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// Auklet contains global state
 type Auklet struct {
 	sync.Mutex
 	DockerClient     *client.Client
@@ -34,17 +35,17 @@ func New(promURL string) (*Auklet, error) {
 		return nil, fmt.Errorf("error creating Docker client: %v", err)
 	}
 
-	var promUrl *url.URL
+	var pURL *url.URL
 	if promURL == "" {
 		return nil, errors.New("prometheus url must be provided")
-	} else {
-		promUrl, err = url.Parse(promURL)
-		if err != nil {
-			return nil, fmt.Errorf("invalid prometheus url: %v", err)
-		}
 	}
 
-	promClient, err := NewPrometheusAPI(promUrl.String())
+	pURL, err = url.Parse(promURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid prometheus url: %v", err)
+	}
+
+	promClient, err := NewPrometheusAPI(pURL.String())
 	if err != nil {
 		return nil, fmt.Errorf("error creating Prometheus client: %v", err)
 	}

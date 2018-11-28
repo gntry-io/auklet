@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// construct a new Prometheus API object to use for querying
+// NewPrometheusAPI constructs a new Prometheus API object to use for querying
 func NewPrometheusAPI(endpoint string) (api.Client, error) {
 	// validate endpoint url
 	uri, err := url.ParseRequestURI(endpoint)
