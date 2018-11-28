@@ -17,6 +17,19 @@ const (
 	StateScaling
 )
 
+type serviceState int
+
+// String implements Stringer interface for serviceState
+func (s serviceState) String() string {
+	switch s {
+	case StateStable: return "stable"
+	case StateOverThreshold: return "over_threshold"
+	case StateUnderThreshold: return "under_threshold"
+	case StateScaling: return "scaling"
+	default: return "unknown"
+	}
+}
+
 // Service is the finite state machine that represents a Swarm Service within
 // Auklet.
 type Service struct {
@@ -34,7 +47,7 @@ type Service struct {
 	DownGracePeriod time.Duration
 	GraceTimer      time.Time
 	auklet          *Auklet
-	state           int
+	state           serviceState
 }
 
 // getService takes service labels and copies/normalizes/validates them
@@ -137,6 +150,7 @@ func (s *Service) overThreshold() {
 	log.Debug("Service over threshold")
 	if s.state == StateStable || s.state == StateUnderThreshold {
 		// Reset last time over threshold
+		log.Debug("Resetting grace timer")
 		s.GraceTimer = time.Now()
 	}
 	s.state = StateOverThreshold
@@ -182,6 +196,7 @@ func (s *Service) scale(replicas int) {
 	if s.CurrentReplicas != replicas {
 		s.auklet.scaleService(s.ServiceID, replicas)
 	}
+
 	// after scaling return to stable state
 	s.stable()
 }
