@@ -11,10 +11,10 @@ import (
 
 // Constants representing the Service states
 const (
-	StateStable         = "stable"
-	StateUnderThreshold = "under_threshold"
-	StateOverThreshold  = "over_threshold"
-	StateScaling        = "scaling"
+	StateStable = iota
+	StateUnderThreshold
+	StateOverThreshold
+	StateScaling
 )
 
 // Service is the finite state machine that represents a Swarm Service within
@@ -34,7 +34,7 @@ type Service struct {
 	DownGracePeriod time.Duration
 	GraceTimer      time.Time
 	auklet          *Auklet
-	state           string
+	state           int
 }
 
 // getService takes service labels and copies/normalizes/validates them
