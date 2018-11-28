@@ -13,6 +13,7 @@ var (
 	gitTag    string
 	buildDate string
 
+	// Definition of the version subcommand
 	versionCmd = &cobra.Command{
 		Use:   "version [no options!]",
 		Short: "Show version",
