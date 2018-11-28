@@ -198,13 +198,12 @@ func (s *Service) scale(replicas int) {
 		s.auklet.scaleService(s.ServiceID, replicas)
 		s.auklet.Lock()
 		s.auklet.metrics[MetricServiceScaleEventsTotal].(prometheus.Counter).Inc()
-		s.auklet.Unlock()
-
 		if replicas > s.CurrentReplicas {
 			s.auklet.serviceMetrics[s.ServiceID][MetricScaleUpEventsCount].(prometheus.Counter).Inc()
 		} else {
 			s.auklet.serviceMetrics[s.ServiceID][MetricScaleDownEventsCount].(prometheus.Counter).Inc()
 		}
+		s.auklet.Unlock()
 	}
 
 	// after scaling return to stable state
