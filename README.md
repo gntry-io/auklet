@@ -32,6 +32,11 @@ If Auklet fails to find and parse the required labels, an error will be issued
 and the service will not be monitored (ignored) by Auklet. When services are
 added, updated or removed Auklet will automatically retry to monitor the service.
 
+# HTTP endpoints
+Auklet exposes pprof and metrics endpoints for profiling and metrics collection:
+- `/debug/pprof/`; for profiling
+- `/metrics`; for metrics scraping (Prometheus)
+
 # Disclaimer
 Auklet is a personal toy project, a work in progress, and nowhere near production
 ready. I'd love to get it to production quality, but in the meantime use at your
