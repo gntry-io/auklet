@@ -38,7 +38,7 @@ var (
 			}
 
 
-			auklet, err := auklet.New(viper.GetString("prometheus-url"))
+			auklet, err := auklet.New(viper.GetString("prometheus-url"), viper.GetInt("listen"))
 			if err != nil {
 				log.Error(err)
 				log.Error("Auklet aborted flight")
@@ -60,11 +60,12 @@ var (
 		TimestampFormat: "2006-01-02T15:04:05.999999999",
 	}
 
-	cfgFile string
-	promURL string
-	debug   bool
-	json	bool
-	nocolor bool
+	cfgFile  string
+	promURL  string
+	debug    bool
+	json	 bool
+	nocolor  bool
+	httpPort int
 )
 
 func init() {
@@ -80,11 +81,13 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&nocolor, "no-color", false, "disable colors in logging")
 	RootCmd.PersistentFlags().BoolVarP(&json, "json", "j", false, "Log output in JSON format")
 	RootCmd.PersistentFlags().StringVarP(&promURL, "prometheus-url", "p", "", "Prometheus API URL")
+	RootCmd.PersistentFlags().IntVarP(&httpPort, "listen", "l", 8080, "Port of HTTP listener")
 	_ = RootCmd.MarkFlagRequired("prometheus-url")
 	_ = viper.BindPFlag("debug", RootCmd.PersistentFlags().Lookup("debug"))
 	_ = viper.BindPFlag("prometheus-url", RootCmd.PersistentFlags().Lookup("prometheus-url"))
 	_ = viper.BindPFlag("json", RootCmd.PersistentFlags().Lookup("json"))
 	_ = viper.BindPFlag("no-color", RootCmd.PersistentFlags().Lookup("no-color"))
+	_ = viper.BindPFlag("listen", RootCmd.PersistentFlags().Lookup("listen"))
 }
 
 func initConfig() {

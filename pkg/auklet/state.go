@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/docker/docker/api/types/swarm"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"time"
@@ -195,6 +196,15 @@ func (s *Service) scale(replicas int) {
 	s.state = StateScaling
 	if s.CurrentReplicas != replicas {
 		s.auklet.scaleService(s.ServiceID, replicas)
+		s.auklet.Lock()
+		s.auklet.metrics[MetricServiceScaleEventsTotal].(prometheus.Counter).Inc()
+		s.auklet.Unlock()
+
+		if replicas > s.CurrentReplicas {
+			s.auklet.serviceMetrics[s.ServiceID][MetricScaleUpEventsCount].(prometheus.Counter).Inc()
+		} else {
+			s.auklet.serviceMetrics[s.ServiceID][MetricScaleDownEventsCount].(prometheus.Counter).Inc()
+		}
 	}
 
 	// after scaling return to stable state

@@ -3,6 +3,7 @@ package auklet
 import (
 	"context"
 	"github.com/docker/docker/api/types/swarm"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"time"
@@ -31,13 +32,13 @@ func (a *Auklet) monitorService(ctx context.Context, s swarm.Service) {
 				monitorLogger.Debug("Poll Prometheus")
 				m, err := a.getMetric(ctx, svc.Query)
 				if err != nil {
-					monitorLogger.WithField("error", err).Error("Error while executing Prometheus query")
+					monitorLogger.WithError(err).Error("Error while executing Prometheus query")
 				}
 				monitorLogger.Debugf("Query returned: %f", m)
 
 				s, err := a.getServiceByID(ctx, svc.ServiceID)
 				if err != nil {
-					monitorLogger.WithField("error", err).Error("Error while querying service from Docker")
+					monitorLogger.WithError(err).Error("Error while querying service from Docker")
 				}
 
 				if s != nil {
@@ -82,8 +83,13 @@ func (a *Auklet) startMonitor(ctx context.Context, s swarm.Service) {
 				ctx, cancel := context.WithCancel(ctx)
 				a.Lock()
 				a.CancelMonitor[s.ID] = cancel
+				a.metrics[MetricServicesMonitored].(prometheus.Gauge).Inc()
 				a.Unlock()
 				go a.monitorService(ctx, s)
+
+				if err := a.createServiceMetrics(s.ID, s.Spec.Name); err != nil {
+					log.WithError(err).Error("Failed to create service metrics")
+				}
 				return
 			}
 		}
@@ -96,10 +102,11 @@ func (a *Auklet) startMonitor(ctx context.Context, s swarm.Service) {
 // deleteMonitor calls cancel on the monitor to stop it, and deletes
 // the cancel() func from Auklet's CancelMonitor map
 func (a *Auklet) deleteMonitor(serviceID string) {
-	if cancel, ok := a.CancelMonitor[serviceID]; ok {
+	if cancel, exists := a.CancelMonitor[serviceID]; exists {
 		a.Lock()
 		cancel()
 		delete(a.CancelMonitor, serviceID)
+		a.metrics[MetricServicesMonitored].(prometheus.Gauge).Dec()
 		a.Unlock()
 	}
 }

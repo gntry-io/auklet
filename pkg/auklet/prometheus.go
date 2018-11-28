@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/model"
 	"net/url"
 	"strconv"
@@ -39,6 +40,10 @@ func (a *Auklet) getMetric(ctx context.Context, query string) (float64, error) {
 	if err != nil {
 		return result, fmt.Errorf("error executing Prometheus query: %v", err)
 	}
+
+	a.Lock()
+	a.metrics[MetricPrometheusQueriesTotal].(prometheus.Counter).Inc()
+	a.Unlock()
 
 	switch value.Type() {
 	case model.ValVector:
