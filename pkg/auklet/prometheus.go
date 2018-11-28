@@ -1,6 +1,8 @@
 package auklet
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
@@ -8,8 +10,6 @@ import (
 	"net/url"
 	"strconv"
 	"time"
-	"context"
-	"errors"
 )
 
 // construct a new Prometheus API object to use for querying
@@ -32,7 +32,7 @@ func NewPrometheusAPI(endpoint string) (api.Client, error) {
 // private function to execute a query against the Prometheus endpoint, and
 // return the metric
 func (a *Auklet) getMetric(ctx context.Context, query string) (float64, error) {
-	result := 0.0
+	var result float64
 	pc := v1.NewAPI(*a.PrometheusClient)
 
 	value, err := pc.Query(ctx, query, time.Now())

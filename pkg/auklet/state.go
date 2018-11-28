@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	StateStable          = "stable"
+	StateStable         = "stable"
 	StateUnderThreshold = "under_threshold"
 	StateOverThreshold  = "over_threshold"
-	StateScaling         = "scaling"
+	StateScaling        = "scaling"
 )
 
 type Service struct {
-	ServiceID		string
+	ServiceID       string
 	PollInterval    time.Duration
 	CurrentReplicas int
 	MinReplicas     int
@@ -34,9 +34,8 @@ type Service struct {
 	state           string
 }
 
-
 // getService takes service labels and copies/normalizes/validates them
-// into a ServiceParams struct
+// into a Service struct
 func getService(a *Auklet, s *swarm.Service) (*Service, error) {
 
 	pollingInterval := 30 * time.Second
@@ -92,7 +91,7 @@ func getService(a *Auklet, s *swarm.Service) (*Service, error) {
 	}
 
 	svc := Service{
-		ServiceID:		 s.ID,
+		ServiceID:       s.ID,
 		PollInterval:    pollingInterval,
 		MinReplicas:     scaleMin,
 		MaxReplicas:     scaleMax,
@@ -104,7 +103,7 @@ func getService(a *Auklet, s *swarm.Service) (*Service, error) {
 		UpGracePeriod:   upGracePeriod,
 		DownGracePeriod: downGracePeriod,
 		auklet:          a,
-		state:			 StateStable,
+		state:           StateStable,
 	}
 
 	log.Debugf("PollingInterval: %s", pollingInterval.String())
@@ -140,7 +139,7 @@ func (s *Service) overThreshold() {
 	s.state = StateOverThreshold
 	if time.Now().Sub(s.GraceTimer) >= s.UpGracePeriod {
 		r := 0
-		if s.CurrentReplicas + s.UpStep <= s.MaxReplicas {
+		if s.CurrentReplicas+s.UpStep <= s.MaxReplicas {
 			r = s.CurrentReplicas + s.UpStep
 		} else {
 			r = s.MaxReplicas
@@ -162,7 +161,7 @@ func (s *Service) underThreshold() {
 	s.state = StateUnderThreshold
 	if time.Now().Sub(s.GraceTimer) >= s.DownGracePeriod {
 		r := 0
-		if s.CurrentReplicas - s.DownStep >= s.MinReplicas {
+		if s.CurrentReplicas-s.DownStep >= s.MinReplicas {
 			r = s.CurrentReplicas - s.DownStep
 		} else {
 			r = s.MinReplicas

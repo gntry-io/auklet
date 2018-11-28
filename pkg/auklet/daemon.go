@@ -69,10 +69,7 @@ func (a *Auklet) Fly() error {
 
 	services, err := a.getAllServices(ctx)
 	if err != nil {
-		// Keep retrying every 30s
-		for err != nil {
-			return err
-		}
+		return err
 	}
 
 	for _, s := range services {

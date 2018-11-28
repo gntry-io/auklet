@@ -15,14 +15,14 @@ import (
 // are added or updated in the Swarm, and update the internal administration
 // (labels) accordingly.
 func (a *Auklet) receiveDockerEvents(ctx context.Context, errorChan chan error) {
-	// Services only emit create, update and remove events
+	// only subscribe to service events (create, update, remove)
 	eventsFilter := filters.NewArgs()
 	eventsFilter.Add("type", "service")
 
 	dctx, cancel := context.WithCancel(ctx)
 	eventChan, errChan := a.DockerClient.Events(dctx, types.EventsOptions{
 		Filters: eventsFilter,
-		Since: time.Now().Format(time.RFC3339Nano),
+		Since:   time.Now().Format(time.RFC3339Nano),
 	})
 	log.Info("Docker event listener started")
 
@@ -116,7 +116,7 @@ func (a *Auklet) getAllServices(ctx context.Context) ([]swarm.Service, error) {
 }
 
 // Private function that actually updates the service and sets the required
-// replicas.
+// number of replicas.
 func (a *Auklet) scaleService(serviceID string, replicas int) {
 	service, _, err := a.DockerClient.ServiceInspectWithRaw(context.Background(), serviceID)
 	if err != nil {
@@ -171,7 +171,7 @@ func (a *Auklet) getReadyServiceTasks(ctx context.Context, serviceID string) ([]
 func (a *Auklet) serviceReady(ctx context.Context, serviceID string, replicas int) bool {
 	serviceLog := log.WithFields(log.Fields{
 		"service_id": serviceID,
-		"replicas": replicas,
+		"replicas":   replicas,
 	})
 
 	tasks, err := a.getReadyServiceTasks(ctx, serviceID)
